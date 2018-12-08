@@ -22,82 +22,7 @@
     </header>
     <div class="cz_container mui-scroll-wrapper">
         <ul class="mui-table-view mui-scroll">
-            <li data-product="" class="mui-table-view-cell">
-                <div class="mui-slider-right mui-disabled">
-                    <a class="mui-btn mui-btn-blue">编辑</a>
-                    <a class="mui-btn mui-btn-red">删除</a>
-                </div>
-                <a href="javascript:;" class="mui-navigate-right mui-slider-handle">
-                    <img class="mui-media-object mui-pull-left" src="images/product.jpg">
-                    <div class="mui-media-body">
-                        <p class="name">热风2016年冬季新款男鞋高帮休闲皮鞋舒适韩版平底鞋H13M6315</p>
-                        <p class="info">
-                            <span class="price">&yen;100.00</span>
-                            <span class="oldPrice">&yen;299.90</span>
-                            <span class="number">x1</span>
-                        </p>
-                        <p><span class="size">鞋码：42</span></p>
-                    </div>
-                    <input type="checkbox"/>
-                </a>
-            </li>
-            <li data-product="" class="mui-table-view-cell">
-                <div class="mui-slider-right mui-disabled">
-                    <a class="mui-btn mui-btn-blue">编辑</a>
-                    <a class="mui-btn mui-btn-red">删除</a>
-                </div>
-                <a href="javascript:;" class="mui-navigate-right mui-slider-handle">
-                    <img class="mui-media-object mui-pull-left" src="images/product.jpg">
-                    <div class="mui-media-body">
-                        <p class="name">热风2016年冬季新款男鞋高帮休闲皮鞋舒适韩版平底鞋H13M6315</p>
-                        <p class="info">
-                            <span class="price">&yen;100.00</span>
-                            <span class="oldPrice">&yen;299.90</span>
-                            <span class="number">x1</span>
-                        </p>
-                        <p><span class="size">鞋码：42</span></p>
-                    </div>
-                    <input type="checkbox"/>
-                </a>
-            </li>
-            <li data-product="" class="mui-table-view-cell">
-                <div class="mui-slider-right mui-disabled">
-                    <a class="mui-btn mui-btn-blue">编辑</a>
-                    <a class="mui-btn mui-btn-red">删除</a>
-                </div>
-                <a href="javascript:;" class="mui-navigate-right mui-slider-handle">
-                    <img class="mui-media-object mui-pull-left" src="images/product.jpg">
-                    <div class="mui-media-body">
-                        <p class="name">热风2016年冬季新款男鞋高帮休闲皮鞋舒适韩版平底鞋H13M6315</p>
-                        <p class="info">
-                            <span class="price">&yen;100.00</span>
-                            <span class="oldPrice">&yen;299.90</span>
-                            <span class="number">x1</span>
-                        </p>
-                        <p><span class="size">鞋码：42</span></p>
-                    </div>
-                    <input type="checkbox"/>
-                </a>
-            </li>
-            <li data-product="" class="mui-table-view-cell">
-                <div class="mui-slider-right mui-disabled">
-                    <a class="mui-btn mui-btn-blue">编辑</a>
-                    <a class="mui-btn mui-btn-red">删除</a>
-                </div>
-                <a href="javascript:;" class="mui-navigate-right mui-slider-handle">
-                    <img class="mui-media-object mui-pull-left" src="images/product.jpg">
-                    <div class="mui-media-body">
-                        <p class="name">热风2016年冬季新款男鞋高帮休闲皮鞋舒适韩版平底鞋H13M6315</p>
-                        <p class="info">
-                            <span class="price">&yen;100.00</span>
-                            <span class="oldPrice">&yen;299.90</span>
-                            <span class="number">x1</span>
-                        </p>
-                        <p><span class="size">鞋码：42</span></p>
-                    </div>
-                    <input type="checkbox"/>
-                </a>
-            </li>
+            <!-- 使用模板引擎 -->
         </ul>
         <div class="cart_order">订单总额：&yen;1022.00 <a href="#">生成订单</a></div>
     </div>
@@ -108,8 +33,29 @@
         <a class="tab_user fa fa-user" href="user/index.html"><span>会员中心</span></a>
     </footer>
 </div>
+<script src="./js/vendor/jquery-1.8.3.min.js"></script>
 <script src="res/mui/js/mui.min.js"></script>
 <script>
+
+    // 验证用户信息
+    $.ajax({
+        url: '/api/user/queryUserMessage',
+        type: 'get',
+        success: function(data) {
+
+            if(data.error == 400) return location.href = '/user/login.html?url=' + location.href;
+        }
+    })
+
+    // 拉取后台数据
+    $.ajax({
+        url: '/api/cart/queryCart',
+        type: 'get',
+        success: function (data) {
+            console.log(data);
+        }
+    })
+
     mui(function(){
         mui.init();
         mui('.mui-table-view').on('tap','.mui-btn-red',function() {

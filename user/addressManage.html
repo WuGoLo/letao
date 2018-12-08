@@ -20,18 +20,23 @@
         <span class="title">收货地址管理</span>
     </header>
     <div class="cz_container">
-        <div class="form_box">
-            <div class="mui-input-row">
-                <input name="delivery" type="text" placeholder="收货人">
+        <form action="">
+            <div class="form_box">
+                <div class="mui-input-row">
+                    <input name="postCode" type="text" placeholder="邮编">
+                </div>
+                <div class="mui-input-row">
+                    <input name="recipients" type="text" placeholder="收货人">
+                </div>
+                <div class="mui-input-row">
+                    <input name="address" type="text" placeholder="省/市/区">
+                </div>
+                <div class="mui-input-row">
+                    <textarea name="addressDetail" id="textarea" rows="5" placeholder="详细地址"></textarea>
+                </div>
+                <input type="submit" class="mui-btn mui-btn-primary btn_login" value="确认">
             </div>
-            <div class="mui-input-row">
-                <input name="postCode" type="text" placeholder="邮编">
-            </div>
-            <div class="mui-input-row">
-                <textarea name="address" id="textarea" rows="5" placeholder="多行文本框"></textarea>
-            </div>
-            <a href="index.html" class="mui-btn mui-btn-primary btn_login">确认</a>
-        </div>
+        </form>
     </div>
     <footer class="cz_tabs">
         <a class="tab_home fa fa-home" href="../index.html"><span>首页</span></a>
@@ -40,6 +45,24 @@
         <a class="tab_user fa fa-user" href="../user/index.html"><span>会员中心</span></a>
     </footer>
 </div>
+<script src="../js/vendor/jquery-1.8.3.min.js"></script>
 <script src="../res/mui/js/mui.min.js"></script>
+<script>
+    var ul = location.search.slice(1);
+    $('form').on('submit', function () {
+        var data = $(this).serialize();
+        // 将id拼接到获得的表单数据字符串中
+        data = 'id=' + ul + '&' + data;
+        $.ajax({
+            url: '/api/address/updateAddress',
+            data: data,
+            type: 'post',
+            success: function(info) {
+                if(info.success) return location.href = '/user/address.html';
+            }
+        })
+        return false;
+    })
+</script>
 </body>
 </html>

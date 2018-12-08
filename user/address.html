@@ -21,34 +21,11 @@
     </header>
     <div class="cz_container">
         <ul class="mui-table-view">
-            <li class="mui-table-view-cell">
-                <div class="mui-slider-right mui-disabled">
-                    <a class="mui-btn mui-btn-red">删除</a>
-                </div>
-                <a href="addressManage.html" class="mui-navigate-right mui-slider-handle">
-                    <div class="delivery">邮编：<span>100000</span>&nbsp;收货人：<span>黄晓明</span></div>
-                    <div class="address">北京市海淀区西三旗街道经验龙办公楼传智播客教育科技有限公司</div>
-                </a>
-            </li>
-            <li class="mui-table-view-cell">
-                <div class="mui-slider-right mui-disabled">
-                    <a class="mui-btn mui-btn-red">删除</a>
-                </div>
-                <a href="addressManage.html" class="mui-navigate-right mui-slider-handle">
-                    <div class="delivery">邮编：<span>100000</span>&nbsp;收货人：<span>黄晓明</span></div>
-                    <div class="address">北京市海淀区西三旗街道经验龙办公楼传智播客教育科技有限公司</div>
-                </a>
-            </li>
-            <li class="mui-table-view-cell">
-                <div class="mui-slider-right mui-disabled">
-                    <a class="mui-btn mui-btn-red">删除</a>
-                </div>
-                <a href="addressManage.html" class="mui-navigate-right mui-slider-handle">
-                    <div class="delivery">邮编：<span>100000</span>&nbsp;收货人：<span>黄晓明</span></div>
-                    <div class="address">北京市海淀区西三旗街道经验龙办公楼传智播客教育科技有限公司</div>
-                </a>
-            </li>
+           
         </ul>
+    </div>
+    <div class="p20">
+        <a href="/user/addAddress.html" class="mui-btn mui-btn-primary btn_outLogin">添加收获地址</a>
     </div>
     <footer class="cz_tabs">
         <a class="tab_home fa fa-home" href="../index.html"><span>首页</span></a>
@@ -57,6 +34,52 @@
         <a class="tab_user fa fa-user" href="../user/index.html"><span>会员中心</span></a>
     </footer>
 </div>
+<script src="../js/vendor/jquery-1.8.3.min.js"></script>
 <script src="../res/mui/js/mui.min.js"></script>
+<script src="../js/vendor/template/template-web.js"></script>
+<script type='text/template' id="tpl">
+    {{each list value}}
+        <li class="mui-table-view-cell">
+            <div class="mui-slider-right mui-disabled">
+                <a class="mui-btn mui-btn-red delAddress" data="{{value.id}}">删除</a>
+            </div>
+            <a href="addressManage.html?{{value.id}}" class="mui-navigate-right mui-slider-handle">
+                <div class="delivery">邮编：<span>{{value.postCode}}</span>&nbsp;收货人：<span>{{value.recipients}}</span></div>
+                <div class="address">{{value.address}} {{value.addressDetail}}</div>
+            </a>
+        </li>
+    {{/each}}
+</script>
+<script type="text/javascript">
+    $.ajax({
+        url: '/api/address/queryAddress',
+        type: 'get',
+        success: function(data) {
+            console.log(data);
+            var json = {"list": data};
+            var html = template('tpl', json);
+            $('.mui-table-view').html(html);
+        }
+    })
+
+    $('.mui-table-view').on('click', '.delAddress', function () {
+        var id = $(this).attr('data');
+        console.log(id);
+        $.ajax({
+            url: '/api/address/deleteAddress',
+            data: {"id": id},
+            type: 'post',
+            success: function(info) {
+                if(info.error) {
+                   return;
+                }
+            }
+        })
+        $(this)
+        .parents('.mui-table-view-cell')
+        .remove();
+    })
+
+</script>
 </body>
 </html>

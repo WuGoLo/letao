@@ -6,7 +6,7 @@
     <meta content="yes" name="apple-mobile-web-app-capable">
     <meta content="black" name="apple-mobile-web-app-status-bar-style">
     <meta content="telephone=no" name="format-detection">
-    <title>登录</title>
+    <title>收货地址管理</title>
     <link type="image/x-icon" rel="shortcut icon" href="../images/favicon.ico">
     <link rel="stylesheet" href="../res/mui/css/mui.min.css"/>
     <link rel="stylesheet" href="../res/fontAwesome/css/font-awesome.min.css"/>
@@ -14,25 +14,27 @@
     <link rel="stylesheet" href="../css/user.css"/>
 </head>
 <body>
-<div class="cz_layout">
+<div class="cz_layout bgg">
     <header class="cz_topBar">
         <a href="javascript:history.back();" class="icon_back fa fa-arrow-left"></a>
-        <span class="title">登录</span>
+        <span class="title">添加收货地址</span>
     </header>
     <div class="cz_container">
-        <form>
+        <form action="">
             <div class="form_box">
                 <div class="mui-input-row">
-                    <input name="username" type="text" placeholder="用户名/手机号">
+                    <input name="postcode" type="text" placeholder="邮编">
                 </div>
                 <div class="mui-input-row">
-                    <input name="password" type="password" placeholder="密码" class="mui-input-password">
-                    <span class="mui-icon mui-icon-eye"></span>
+                    <input name="recipients" type="text" placeholder="收货人">
                 </div>
-                <input type="submit" class="mui-btn mui-btn-primary btn_login" value="登陆">
-                <div class="mui-input-row cz_text">
-                    <a href="register.html">免费注册</a>
+                <div class="mui-input-row">
+                    <input name="address" type="text" placeholder="省/市/县">
                 </div>
+                <div class="mui-input-row">
+                    <textarea name="addressDetail" id="textarea" rows="5" placeholder="详细地址"></textarea>
+                </div>
+                <input type="submit" class="mui-btn mui-btn-primary btn_login" value="添加">
             </div>
         </form>
     </div>
@@ -46,26 +48,18 @@
 <script src="../js/vendor/jquery-1.8.3.min.js"></script>
 <script src="../res/mui/js/mui.min.js"></script>
 <script type="text/javascript">
-    var searchUrl = location.search.slice(1);
-    var exp = /url=(.+)/;
-    var baseUrl = exp.exec(searchUrl);
-    var Url  = baseUrl && baseUrl[1];
-    Url = Url || '/';
-    console.log(Url);
-    // 登录功能
-    $('form').on('submit', function() {
+    $('form').on('submit',function() {
         var data = $(this).serialize();
-        $.ajax({
-            url: '/api/user/login',
-            data: data,
-            type: 'post',
-            success: function(data) {
-                if(data.success) location.href = Url;               
-            }
-        }) 
+            $.ajax({
+                url: '/api/address/addAddress',
+                data: data,
+                type: 'post',
+                success: function (info) {
+                    if(info.success) return location.href = '/user/address.html';
+                }
+            })
         return false;
     })
-
 </script>
 </body>
 </html>
