@@ -41,7 +41,7 @@
                         <li><a href="#"><img src="images/brand8.png" alt=""/><p>耐克</p></a></li>
                         <li><a href="#"><img src="images/brand1.png" alt=""/><p>耐克</p></a></li>
                     </ul>
-                    <span class="title">运动休闲</span>
+                    <span class="title" id="stitle">运动休闲</span>
                     <ul class="mui-clearfix" id="sechond-silder">
                         <!-- 从后台拉取数据 -->
                     </ul>
@@ -102,6 +102,7 @@
     $('.cate_ul').on('click', 'li', function () {
         $(this).addClass('now').siblings().removeClass('now');
         var id = $(this).attr('data');
+        var text = $(this).text();
         console.log(id);
         $.ajax({
             url: '/api/category/querySecondCategory',
@@ -111,6 +112,7 @@
                 console.log(info);
                 var html = template('second', info);
                 $('#sechond-silder').html(html);
+                $('#stitle').text(text);
             }
         })
     })
