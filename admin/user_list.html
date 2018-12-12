@@ -127,15 +127,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>某某某</td>
-                                <td>否</td>
-                                <td>15901256171</td>
-                                <td>
-                                    <a href="javascript:;" class="btn btn-warning btn-xs">禁 用</a>
-                                </td>
-                            </tr>
+                           <!-- 后台拉取数据 -->
                         </tbody>
                     </table>
                 </div>
@@ -147,5 +139,74 @@
     <script src="./assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="./assets/nprogress/nprogress.js"></script>
     <script src="./js/common.js"></script>
+    <script src="/js/vendor/template/template-web.js"></script>
+    <script type="text/template" id="tpl">
+        {{each rows val index}}
+        <tr>
+            <td>{{index}}</td>
+            <td>{{val.username}}</td>
+            <td>{{val.mobile}}</td>
+            {{if(val.isDelete == 1)}}
+                <td class="status">否</td>
+            {{else}}
+                <td class="status">是</td>
+            {{/if}}
+            <td>
+                {{if(val.isDelete == 1)}}
+                    <a href="javascript:;" class="btn btn-warning btn-xs" data="{{val.id}}" data-status="{{val.isDelete}}">禁 用</a>
+                {{else}}
+                    <a href="javascript:;" class="btn btn-info btn-xs" data="{{val.id}}" data-status="{{val.isDelete}}">启 用</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/each}}
+    </script>
+    <script>
+        $.ajax({
+            url: '/api/user/queryUser',
+            type: 'get',
+            data: {
+                page: 1,
+                pageSize: 5,
+            },
+            success: function(info) {
+                console.log(info);
+                var html = template('tpl', info);
+                $('tbody').html(html);
+            }
+        })
+        // 点击更改状态
+        $('tbody').on('click', '.btn-xs', function () {
+            var status = $(this).attr('data-status');
+            var id = $(this).attr('data');
+            var _this = $(this);
+            status = Math.abs(status - 1);
+            $.ajax({
+                url: '/api/user/updateUser',
+                type: 'post',
+                data: {
+                    id: id,
+                    isDelete: status,
+                },
+                success: function (info) {
+                    console.log(info);
+                    if(info.success) {
+                        _this.toggleClass('btn-warning btn-info');
+                        _this.hasClass('btn-warning') ? _this.text('禁 用') : _this.text('启用');
+                        if(status == 1) {
+                            _this.attr('data-status', '1');
+                            _this.parent().prev().text('否');
+                            status = 1;
+                        } else {
+                            _this.attr('data-status', '0');
+                            _this.parent().prev().text('是');
+                            status = 0;
+                        };
+                        console.log(status);
+                    }
+                }
+            })
+        })               
+    </script>
 </body>
 </html>
