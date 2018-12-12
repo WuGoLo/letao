@@ -22,12 +22,8 @@
     </header>
     <div class="cz_container">
         <div class="cate_slide">
-            <ul>
-                <li class="now">运动馆</li>
-                <li>女士馆</li>
-                <li>男士馆</li>
-                <li>帆布馆</li>
-                <li>户外馆</li>
+            <ul class="cate_ul">
+                <!-- <li class="now">运动馆</li> -->
             </ul>
         </div>
         <div class="cate_content">
@@ -46,15 +42,8 @@
                         <li><a href="#"><img src="images/brand1.png" alt=""/><p>耐克</p></a></li>
                     </ul>
                     <span class="title">运动休闲</span>
-                    <ul class="mui-clearfix">
-                        <li><a href="#"><img src="images/brand1.png" alt=""/><p>耐克</p></a></li>
-                        <li><a href="#"><img src="images/brand2.png" alt=""/><p>耐克</p></a></li>
-                        <li><a href="#"><img src="images/brand3.png" alt=""/><p>耐克</p></a></li>
-                        <li><a href="#"><img src="images/brand4.png" alt=""/><p>耐克</p></a></li>
-                        <li><a href="#"><img src="images/brand5.png" alt=""/><p>耐克</p></a></li>
-                        <li><a href="#"><img src="images/brand6.png" alt=""/><p>耐克</p></a></li>
-                        <li><a href="#"><img src="images/brand7.png" alt=""/><p>耐克</p></a></li>
-                        <li><a href="#"><img src="images/brand8.png" alt=""/><p>耐克</p></a></li>
+                    <ul class="mui-clearfix" id="sechond-silder">
+                        <!-- 从后台拉取数据 -->
                     </ul>
                 </div>
             </div>
@@ -67,8 +56,65 @@
         <a class="tab_user fa fa-user" href="user/index.html"><span>会员中心</span></a>
     </footer>
 </div>
+<!-- 页面一级导航模板 -->
+<script type="text/template" id="tpl">
+    {{each rows val}}
+        <li data="{{val.id}}">{{val.categoryName}}</li>
+    {{/each}}
+</script>
+<!-- 页面二级导航模板 -->
+<script type="text/template" id='second'>
+    {{each rows val}}
+        <li>
+            <a href="#">
+                <img src="/api{{val.brandLogo}}" alt=""/><p>{{val.brandName}}</p>
+            </a>
+        </li>
+    {{/each}}
+</script>
+<script src="/js/vendor/jquery-1.8.3.min.js"></script>
 <script src="res/mui/js/mui.min.js"></script>
+<script src="/js/vendor/template/template-web.js"></script>
+
 <script>
+    // 验证用户信息
+    $.ajax({
+        url: '/api/user/queryUserMessage',
+        type: 'get',
+        success: function(data) {
+            if(data.error == 400) return location.href = '/user/login.html?url=' + location.href;
+        }
+    })
+
+    // 拉取一级导航后台数据
+    $.ajax({
+        url: '/api/category/queryTopCategory',
+        type: 'get',
+        success: function(info) {
+            console.log(info);
+            var html = template('tpl', info);
+            $('.cate_slide ul').html(html);
+            $('.cate_slide').find('li').eq(0).addClass('now');
+            $('.cate_ul .now').trigger('click');
+        }
+    })
+
+    $('.cate_ul').on('click', 'li', function () {
+        $(this).addClass('now').siblings().removeClass('now');
+        var id = $(this).attr('data');
+        console.log(id);
+        $.ajax({
+            url: '/api/category/querySecondCategory',
+            type: 'get',
+            data: {"id": id},
+            success: function (info) {
+                console.log(info);
+                var html = template('second', info);
+                $('#sechond-silder').html(html);
+            }
+        })
+    })
+
     mui(function(){
         mui('.mui-scroll-wrapper').scroll({
             scrollY: true, //是否竖向滚动

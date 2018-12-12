@@ -46,6 +46,13 @@
 <script src="../js/vendor/jquery-1.8.3.min.js"></script>
 <script src="../res/mui/js/mui.min.js"></script>
 <script type="text/javascript">
+    var searchUrl = location.search.slice(1);
+    var exp = /url=(.+)/;
+    var baseUrl = exp.exec(searchUrl);
+    var Url  = baseUrl && baseUrl[1];
+    Url = Url || '/';
+    console.log(Url);
+    // 登录功能
     $('form').on('submit', function() {
         var data = $(this).serialize();
         $.ajax({
@@ -53,11 +60,7 @@
             data: data,
             type: 'post',
             success: function(data) {
-
-                if(data.success) {
-                    location.href = '/';
-                }
-                
+                if(data.success) return location.href = Url;               
             }
         }) 
         return false;
