@@ -12,6 +12,13 @@
     <link rel="stylesheet" href="res/fontAwesome/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="css/common.css"/>
     <link rel="stylesheet" href="css/cart.css"/>
+    <style>
+        .cz_container {
+            padding: 0 auto;
+            top: 45px;
+            /* bottom: 80px; */
+        }
+    </style>
 </head>
 <body>
 <div class="cz_layout">
@@ -20,10 +27,17 @@
         <span class="title">购物车</span>
         <a href="javascript:;" class="icon_refresh fa fa-refresh"></a>
     </header>
+
     <div class="cz_container mui-scroll-wrapper">
-        <ul class="mui-table-view mui-scroll">
-            <!-- 使用模板引擎 -->
-        </ul>
+    <!--下拉刷新容器-->
+        <div id="refreshContainer" class="mui-content mui-scroll-wrapper">
+            <div class="mui-scroll">
+                <!--数据列表-->
+                <ul class="mui-table-view mui-table-view-chevron">
+                <!-- 拉取后台数据 -->
+                </ul>
+            </div>
+        </div>
         <div class="cart_order">订单总额：&yen;1022.00 <a href="#">生成订单</a></div>
     </div>
     <footer class="cz_tabs">
@@ -34,7 +48,31 @@
     </footer>
 </div>
 <script src="./js/vendor/jquery-1.8.3.min.js"></script>
+<script src="./js/vendor/template/template-web.js"></script>
 <script src="res/mui/js/mui.min.js"></script>
+<script type="text/template" id="tpl">
+    {{each data value}}
+    <li data-product="" class="mui-table-view-cell">
+        <div class="mui-slider-right mui-disabled">
+            <a class="mui-btn mui-btn-blue" data="{{value.id}}">编辑</a>
+            <a class="mui-btn mui-btn-red" data="{{value.id}}">删除</a>
+        </div>
+        <a href="javascript:;" class="mui-navigate-right mui-slider-handle">
+            <img class="mui-media-object mui-pull-left" src="/api{{value.pic[0].picAddr}}">
+            <div class="mui-media-body">
+                <p class="name">{{value.proName}}</p>
+                <p class="info">
+                    <span class="price">&yen;{{value.price}}</span>
+                    <span class="oldPrice">&yen;{{value.oldPrice}}</span>
+                    <span class="number">x{{value.num}}</span>
+                </p>
+                <p><span class="size">鞋码：{{value.size}}</span></p>
+            </div>
+            <input type="checkbox"/>
+        </a>
+    </li>
+    {{/each}}
+</script>
 <script>
 
     // 验证用户信息
@@ -42,54 +80,127 @@
         url: '/api/user/queryUserMessage',
         type: 'get',
         success: function(data) {
-
+            // 如果没登录跳转
             if(data.error == 400) return location.href = '/user/login.html?url=' + location.href;
         }
     })
-
-    // 拉取后台数据
-    $.ajax({
-        url: '/api/cart/queryCart',
-        type: 'get',
-        success: function (data) {
-            console.log(data);
+    // 下拉刷新，拉叔后台数据
+    var page = 1;
+    var pageSize = 5;
+    mui.init({
+        pullRefresh : {
+            container:"#refreshContainer",
+            down : {
+                height: 50,
+                auto: true,
+                contentdown : "下拉可以刷新",
+                contentover : "释放立即刷新",
+                contentrefresh : "正在刷新...",
+                callback : function () {
+                    // 拉取后台数据
+                    $.ajax({
+                        url: '/api/cart/queryCartPaging',
+                        type: 'get',
+                        data: {
+                            page: 1,
+                            pageSize: pageSize
+                        },
+                        success: function (info) {
+                            var html = template('tpl', info);
+                            $('.mui-table-view').html(html);
+                        }
+                    });
+                    mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                    page = 1;
+                    mui('#refreshContainer').pullRefresh().enablePullupToRefresh();
+                }
+            },
+            up : {
+                height: 50,//可选.默认50.触发上拉加载拖动距离
+                auto: false,//可选,默认false.自动上拉加载一次
+                contentrefresh: "正在加载...",//可选，正在加载状态时，上拉加载控件上显示的标题内容
+                contentnomore:'没有更多数据了',//可选，请求完毕若没有更多数据时显示的提醒内容；
+                callback: function () {
+                    page++;
+                    $.ajax({
+                        url: '/api/cart/queryCartPaging',
+                        type: 'get',
+                        data: {
+                            page: page,
+                            pageSize: pageSize
+                        },
+                        success: function (info) {
+                            if(info.length == 0) {
+                                mui('#refreshContainer').pullRefresh().endPullupToRefresh(true);
+                                return;
+                            }
+                            var html = template('tpl', info);
+                            $('.mui-table-view').append(html);
+                        }
+                    });
+                    // 数据加载完结束上拉刷新事件
+                    mui('#refreshContainer').pullRefresh().endPullupToRefresh();
+                }
+            }
         }
-    })
+    });
 
     mui(function(){
         mui.init();
         mui('.mui-table-view').on('tap','.mui-btn-red',function() {
             var btnArray = ['是', '否'];
+            var _this = $(this); 
             mui.confirm('你要删除这件商品吗？', '温馨提示', btnArray, function(e) {
+                // console.log(e);
+                // 判断用户是否确定要删除数据
                 if (e.index == 0) {
-
-                } else {
-
+                    var id = _this.attr('data');
+                    $.ajax({
+                        url: '/api/cart/deleteCart',
+                        type: 'get',
+                        data: {"id": id},
+                        success: function (info) {
+                            if(info.success) {
+                                _this.parents('.mui-table-view-cell').remove();
+                            }
+                        }
+                    })
                 }
             })
         });
         mui('.mui-table-view').on('tap','.mui-btn-blue', function(e) {
+            var _this = $(this);
             e.detail.gesture.preventDefault(); //修复iOS 8.x平台存在的bug，使用plus.nativeUI.prompt会造成输入法闪一下又没了
             var btnArray = ['确定', '取消'];
-            var template = '<input type="number" placeholder="选择数量"/><br>' +
-                    '<input type="text" placeholder="选择尺码" />';
+            var template = '<form>'+
+                    '<input type="number" name="num" placeholder="选择数量"/><br>' +
+                    '<input type="text" name="size" placeholder="选择尺码" />' +  
+                    '</form>';
             mui.confirm(template, '编辑商品', btnArray, function(e) {
+                var num = $("input[name='num']").val();
+                var size = $("input[name='size']").val();
+                var data = 'num='+ num + '&size=' + size + '&id=' + _this.attr('data');
+                console.log(data);
                 if (e.index == 0) {
-
-                } else {
-
+                    $.ajax({
+                        url: 'api/cart/updateCart',
+                        data: data,
+                        type: 'post',
+                        success: function (info) {
+                            if(info.success) {
+                                _this.parents('.mui-table-view-cell')
+                                .find('.number')
+                                .text('x' + num)
+                                .end()
+                                .find('.size')
+                                .text('鞋码：' + size);
+                            }
+                        }
+                    })
                 }
             })
-        });
-        mui('.mui-scroll-wrapper').scroll({
-            scrollY: true, //是否竖向滚动
-            scrollX: false, //是否横向滚动
-            startX: 0, //初始化时滚动至x
-            startY: 0, //初始化时滚动至y
-            indicators: false, //是否显示滚动条
-            deceleration:0.0006, //阻尼系数,系数越小滑动越灵敏
-            bounce: true, //是否启用回弹
-        });
+        }); 
+
     });
 </script>
 </body>

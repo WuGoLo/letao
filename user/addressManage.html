@@ -19,24 +19,8 @@
         <a href="javascript:history.back();" class="icon_back fa fa-arrow-left"></a>
         <span class="title">收货地址管理</span>
     </header>
-    <div class="cz_container">
-        <form action="">
-            <div class="form_box">
-                <div class="mui-input-row">
-                    <input name="postCode" type="text" placeholder="邮编">
-                </div>
-                <div class="mui-input-row">
-                    <input name="recipients" type="text" placeholder="收货人">
-                </div>
-                <div class="mui-input-row">
-                    <input name="address" type="text" placeholder="省/市/区">
-                </div>
-                <div class="mui-input-row">
-                    <textarea name="addressDetail" id="textarea" rows="5" placeholder="详细地址"></textarea>
-                </div>
-                <input type="submit" class="mui-btn mui-btn-primary btn_login" value="确认">
-            </div>
-        </form>
+    <div class="cz_container">      
+        <!-- 通过模板绘制数据 -->
     </div>
     <footer class="cz_tabs">
         <a class="tab_home fa fa-home" href="../index.html"><span>首页</span></a>
@@ -46,18 +30,57 @@
     </footer>
 </div>
 <script src="../js/vendor/jquery-1.8.3.min.js"></script>
+<script src="../js/vendor/template/template-web.js"></script>
 <script src="../res/mui/js/mui.min.js"></script>
+<script type="text/template" id="tpl">
+    <form action="">
+        <div class="form_box">
+            <div class="mui-input-row">
+                <input name="postcode" type="text" value="{{postCode}}">
+            </div>
+            <div class="mui-input-row">
+                <input name="recipients" type="text" value="{{recipients}}">
+            </div>
+            <div class="mui-input-row">
+                <input name="address" type="text" value="{{address}}">
+            </div>
+            <div class="mui-input-row">
+                <textarea rows="5">{{addressDetail}}</textarea>
+            </div>
+            <input type="submit" class="mui-btn mui-btn-primary btn_login" value="确认">
+        </div>
+    </form>
+</script>
 <script>
-    var ul = location.search.slice(1);
-    $('form').on('submit', function () {
+    var id = location.search.slice(1);
+    console.log(id);
+    $.ajax({
+        url: '/api/address/queryAddress',
+        type: 'get',
+        success: function(info) {
+            var data;
+            info.forEach(function (item, index) {
+               if(item.id == id) {
+                data = item;
+                return;
+               } 
+            })      
+            var html = template('tpl', data);
+            $('.cz_container').html(html);
+        }
+    })
+    $('.cz_container').on('submit', 'form', function () {
         var data = $(this).serialize();
+        var addDetail = $('textarea').text();
         // 将id拼接到获得的表单数据字符串中
-        data = 'id=' + ul + '&' + data;
+        var str = 'id=' + id + '&' + 'addressDetail=' + addDetail + '&' + data;
+        console.log(str);
         $.ajax({
             url: '/api/address/updateAddress',
-            data: data,
+            data: str,
             type: 'post',
             success: function(info) {
+                console.log(info);
                 if(info.success) return location.href = '/user/address.html';
             }
         })
